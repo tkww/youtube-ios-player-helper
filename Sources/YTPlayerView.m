@@ -709,15 +709,13 @@ NSString static *const kYTPlayerSyndicationRegexPattern = @"^https://tpc.googles
 
   NSError *error = nil;
   NSString *path = [[NSBundle bundleForClass:[YTPlayerView class]] pathForResource:@"YTPlayerView-iframe-player"
-                                                   ofType:@"html"
-                                              inDirectory:@"Assets"];
+                                                                            ofType:@"html"];
     
   // in case of using Swift and embedded frameworks, resources included not in main bundle,
   // but in framework bundle
   if (!path) {
       path = [[[self class] frameworkBundle] pathForResource:@"YTPlayerView-iframe-player"
-                                                     ofType:@"html"
-                                                inDirectory:@"Assets"];
+                                                      ofType:@"html"];
   }
     
   NSString *embedHTMLTemplate =
@@ -872,14 +870,18 @@ NSString static *const kYTPlayerSyndicationRegexPattern = @"^https://tpc.googles
 }
 
 + (NSBundle *)frameworkBundle {
-    static NSBundle* frameworkBundle = nil;
-    static dispatch_once_t predicate;
-    dispatch_once(&predicate, ^{
-        NSString* mainBundlePath = [[NSBundle bundleForClass:[self class]] resourcePath];
-        NSString* frameworkBundlePath = [mainBundlePath stringByAppendingPathComponent:@"Assets.bundle"];
-        frameworkBundle = [NSBundle bundleWithPath:frameworkBundlePath];
-    });
-    return frameworkBundle;
+#ifdef SWIFTPM_MODULE_BUNDLE
+  return SWIFTPM_MODULE_BUNDLE;
+#else
+  static NSBundle* frameworkBundle = nil;
+  static dispatch_once_t predicate;
+  dispatch_once(&predicate, ^{
+      NSString* mainBundlePath = [[NSBundle bundleForClass:[self class]] resourcePath];
+      NSString* frameworkBundlePath = [mainBundlePath stringByAppendingPathComponent:@"Assets.bundle"];
+      frameworkBundle = [NSBundle bundleWithPath:frameworkBundlePath];
+  });
+  return frameworkBundle;
+#endif
 }
 
 @end
